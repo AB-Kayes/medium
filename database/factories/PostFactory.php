@@ -24,7 +24,7 @@ class PostFactory extends Factory
             'content' => fake()->paragraph(5),
             'category_id' => Category::inRandomOrder()->first()->id,
             'user_id' => 1,
-            'image' => fake()->imageUrl(),
+            'image' => "https://flowbite.com/docs/images/blog/image-1.jpg",
             'published_at' => fake()->optional()->dateTime(),
         ];
     }

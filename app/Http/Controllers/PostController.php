@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
@@ -14,7 +16,7 @@ class PostController extends Controller
     {
         $posts = Post::orderBy('created_at', 'DESC')->paginate(5);
 
-        return view('post.index',['posts' => $posts]);
+        return view('post.index', ['posts' => $posts]);
     }
 
     /**
@@ -22,7 +24,9 @@ class PostController extends Controller
      */
     public function create()
     {
-        //
+        $categories = Category::all();
+
+        return view('post.create', ['categories' => $categories]);
     }
 
     /**
@@ -30,7 +34,21 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
+            'published_at' => 'nullable|dateTime',
+        ]);
+
+        $validated['image'] = $request->file('image')->store('posts', 'public');
+        $validated['slug'] = Str::slug($validated['title']);
+        $validated['user_id'] = auth()->id();
+
+        Post::create($validated);
+
+        return redirect()->route('post.index')->with('success', 'Post created successfully');
     }
 
     /**
