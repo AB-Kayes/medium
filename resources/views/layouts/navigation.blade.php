@@ -48,6 +48,7 @@
                         </button>
                     </div>
 
+                    @auth
                     <x-dropdown align="right" width="48">
                         <x-slot name="trigger">
                             <button
@@ -81,6 +82,16 @@
                             </form>
                         </x-slot>
                     </x-dropdown>
+                    @endauth
+                    @guest
+                    <a href="{{ route('login') }}" class="inline-flex items-center px-1 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
+                        {{ __('Login') }}
+                    </a>
+                    <span>/</span>
+                    <a href="{{ route('register') }}" class="inline-flex items-center px-1 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
+                        {{ __('Register') }}
+                    </a>
+                    @endguest
                 </div>
 
                 <!-- Hamburger -->
@@ -129,6 +140,7 @@
                 </x-responsive-nav-link>
             </div> --}}
 
+            @auth
             <!-- Responsive Settings Options -->
             <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
                 <div class="px-4">
@@ -174,6 +186,7 @@
                     </form>
                 </div>
             </div>
+            @endauth
         </div>
     </div>
 </nav>

@@ -2,7 +2,7 @@
     class="bg-white dark:bg-gray-800 overflow-hidden border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col-reverse md:flex-row">
     <div class="flex-1 p-6 flex flex-col justify-between">
         <div>
-            <a href="#" class="block group">
+            <a href="{{ route('post.show', ['username' => $post->user->username, 'post' => $post->slug]) }}" class="block group">
                 <h5
                     class="mb-3 text-xl font-bold tracking-tight text-gray-900 dark:text-white group-hover:text-brand dark:group-hover:text-blue-400 transition-colors duration-200">
                     {{ $post->title }}
@@ -12,7 +12,7 @@
                 {{ Str::words($post->content, 20) }}
             </p>
         </div>
-        <a href="#" class="">
+        <a href="{{ route('post.show', ['username' => $post->user->username, 'post' => $post->slug]) }}" class="">
             <x-primary-button>
                 <span>Read more</span>
                 <svg class="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true"
@@ -23,9 +23,9 @@
             </x-primary-button>
         </a>
     </div>
-    <a href="#" class="shrink-0 w-full md:w-64 h-48 md:h-auto md:self-stretch group overflow-hidden">
+    <a href="{{ route('post.show', ['username' => $post->user->username, 'post' => $post->slug]) }}" class="shrink-0 w-full md:w-64 h-48 md:h-auto md:self-stretch group overflow-hidden">
         <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            src="{{ $post->image }}"
+            src="{{ $post->image}}"
             alt="{{ $post->title }}" />
     </a>
 </div>

@@ -28,6 +28,18 @@ class ProfileController extends Controller
     {
         $request->user()->fill($request->validated());
 
+        if ($request->hasFile('image')) {
+            $request->user()->image = $request->file('image')->store('avatars', 'public');
+        } elseif ($request->input('image_remove') === '1') {
+            $request->user()->image = null;
+        }
+
+        if ($request->isNotFilled('username')) {
+            $request->user()->username = $request->input('username');
+        }
+
+        $request->user()->bio = $request->input('bio');
+
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
         }
