@@ -3,7 +3,10 @@
 namespace Database\Factories;
 
 use App\Models\Category;
+use App\Models\Post;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Post>
@@ -18,14 +21,26 @@ class PostFactory extends Factory
     public function definition(): array
     {
         $title = fake()->sentence();
+
         return [
             'title' => $title,
-            'slug' => \Illuminate\Support\Str::slug($title),
+            'slug' => Str::slug($title),
             'content' => fake()->paragraph(5),
             'category_id' => Category::inRandomOrder()->first()->id,
             'user_id' => 1,
-            'image' => "https://flowbite.com/docs/images/blog/image-1.jpg",
-            'published_at' => fake()->optional()->dateTime(),
+            'published_at' => fake()->optional()->dateTimeBetween('-1 year', 'now'),
         ];
+    }
+
+    public function configure(): static
+    {
+        return $this->afterCreating(function (Post $post): void {
+            // Add media using the Flowbite image URL
+            $imageUrl = 'https://flowbite.com/docs/images/blog/image-1.jpg';
+            
+            $post
+                ->addMediaFromUrl($imageUrl)
+                ->toMediaCollection();
+        });
     }
 }

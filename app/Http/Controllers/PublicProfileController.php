@@ -10,7 +10,7 @@ class PublicProfileController extends Controller
     {
         $user->loadCount('followers');
 
-        $posts = $user->posts()->latest()->paginate(5);
+        $posts = $user->posts()->where('published_at', '<=', now())->with(['user', 'media'])->withCount('likes')->latest()->paginate(5);
 
         return view('profile.show', ['user' => $user, 'posts' => $posts]);
     }

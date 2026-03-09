@@ -21,7 +21,7 @@
                             {{ $posts->onEachSide(1)->links() }}
                         </div>
                     </div>
-                    <x-follow-container :user="$user"  class="w-[20vw] border-l px-4">
+                    <x-follow-container :user="$user"  class="w-[20vw] flex flex-col items-center border-l px-4">
                         <img src="{{ $user->imageUrl() }}" alt="{{ $user->name }}" class="w-24 h-24 rounded-full ">
                         <h1 class="text-2xl font-bold">{{ $user->name }}</h1>
                         <p class="text-sm text-gray-500 dark:text-gray-400">

@@ -8,12 +8,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class User extends Authenticatable
+class User extends Authenticatable implements HasMedia
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, InteractsWithMedia, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -52,8 +54,15 @@ class User extends Authenticatable
         ];
     }
 
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this
+            ->addMediaConversion('avatar')
+            ->width(128);
+    }
+
     public function posts(): HasMany
-    { 
+    {
         return $this->hasMany(Post::class);
     }
 
@@ -76,14 +85,14 @@ class User extends Authenticatable
 
         static::creating(function (User $user): void {
             // Generate username from name if not already set
-            if (empty($user->username) && !empty($user->name)) {
+            if (empty($user->username) && ! empty($user->name)) {
                 $baseUsername = Str::slug($user->name);
                 $username = $baseUsername;
                 $counter = 1;
 
                 // Ensure username is unique
                 while (static::where('username', $username)->exists()) {
-                    $username = $baseUsername . $counter;
+                    $username = $baseUsername.$counter;
                     $counter++;
                 }
 
@@ -92,9 +101,17 @@ class User extends Authenticatable
         });
     }
 
-    public function imageUrl()
+    public function imageUrl(): string
     {
-        return $this->image ? Storage::url($this->image) : asset('user.png');
+        $url = $this->getFirstMediaUrl('avatar', 'avatar') ?: $this->getFirstMediaUrl('avatar');
+
+        if ($url !== '') {
+            return $url;
+        }
+
+        $name = rawurlencode($this->name ?: 'User');
+
+        return "https://ui-avatars.com/api/?name={$name}&background=2563eb&color=ffffff&size=256&rounded=true";
     }
 
     public function isFollowedBy(?User $user): bool

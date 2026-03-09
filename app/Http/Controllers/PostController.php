@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\PostCreateRequest;
+use App\Http\Requests\PostUpdateRequest;
 use App\Models\Category;
 use App\Models\Post;
 use Illuminate\Http\Request;
@@ -15,7 +16,11 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::orderBy('created_at', 'DESC')->paginate(5);
+        \DB::listen(function ($query) {
+           \Log::info($query->sql);
+        });
+
+        $posts = Post::where('published_at', '<=', now())->with(['user', 'media'])->withCount('likes')->orderBy('created_at', 'DESC')->paginate(5);
 
         return view('post.index', ['posts' => $posts]);
     }
@@ -37,11 +42,11 @@ class PostController extends Controller
     {
         $validated = $request->validated();
 
-        $validated['image'] = $request->file('image')->store('posts', 'public');
-        $validated['slug'] = Str::slug($validated['title']);
         $validated['user_id'] = auth()->id();
 
-        Post::create($validated);
+        $post = Post::create($validated);
+
+        $post->addMediaFromRequest('image')->toMediaCollection();
 
         return redirect()->route('post.index')->with('success', 'Post created successfully');
     }
@@ -59,15 +64,28 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
-        //
+        abort_if($post->user_id !== auth()->id(), 403);
+        $categories = Category::all();
+        return view('post.edit', ['post' => $post, 'categories' => $categories]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Post $post)
+    public function update(PostUpdateRequest $request, Post $post)
     {
-        //
+        abort_if($post->user_id !== auth()->id(), 403);
+
+        $validated = $request->validated();
+
+        $post->update($validated);
+
+        if ($request->hasFile('image')) {
+            $post->clearMediaCollection();
+            $post->addMediaFromRequest('image')->toMediaCollection();
+        }
+
+        return redirect()->route('post.myPosts')->with('success', 'Post updated successfully');
     }
 
     /**
@@ -75,6 +93,23 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
-        //
+        abort_if($post->user_id !== auth()->id(), 403);
+        $post->delete();
+        return redirect()->route('post.myPosts')->with('success','Post deleted successfully');
+    }
+
+    public function category(Category $category)
+    {
+        $posts = $category->posts()->where('published_at', '<=', now())->with(['user', 'media'])->withCount('likes')->orderBy('created_at', 'DESC')->paginate(5);
+
+        return view('post.index', ['posts' => $posts]);
+    }
+
+    public function myPosts()
+    {
+        $user = auth()->user();
+        $posts = $user->posts()->with(['user', 'media'])->withCount('likes')->orderBy('created_at', 'DESC')->paginate(5);
+
+        return view('post.index', ['posts' => $posts]);
     }
 }

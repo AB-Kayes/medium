@@ -69,7 +69,11 @@
         <!--image-->
         <div>
             <x-input-label for="image" :value="__('Image')" />
-            <x-image-uploader name="image" size="small" :existingImage="$user->image ? \Illuminate\Support\Facades\Storage::url($user->image) : null" />
+            <x-image-uploader
+                name="image"
+                size="small"
+                :existingImage="$user->getFirstMediaUrl('avatar', 'avatar') ?: null"
+            />
             <x-input-error class="mt-2" :messages="$errors->get('image')" />
         </div>
 

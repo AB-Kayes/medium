@@ -5,10 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Image\Enums\Fit;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Spatie\Sluggable\HasSlug;
+use Spatie\Sluggable\SlugOptions;
 
-class Post extends Model
+class Post extends Model implements HasMedia
 {
-    use HasFactory;
+    use HasFactory, InteractsWithMedia, HasSlug;
 
     protected $fillable = [
         'title',
@@ -16,9 +22,30 @@ class Post extends Model
         'content',
         'category_id',
         'user_id',
-        'image',
         'published_at',
     ];
+
+    protected $casts = [
+        'published_at' => 'datetime',
+    ];
+
+    public function getSlugOptions() : SlugOptions
+    {
+        return SlugOptions::create()
+            ->generateSlugsFrom('title')
+            ->saveSlugsTo('slug');
+    }
+
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this
+            ->addMediaConversion('preview')
+            ->fit(Fit::Crop, 400, 250);
+
+        $this
+            ->addMediaConversion('large')
+            ->width(1200);
+    }
 
     public function user()
     {
@@ -43,21 +70,14 @@ class Post extends Model
         return $this->hasMany(Like::class);
     }
 
-    /**
-     * Get the image URL attribute.
-     */
-    public function getImageAttribute($value): ?string
+    public function imageUrl(string $media = 'preview'): ?string
     {
-        if (! $value) {
-            return null;
+        $mediaItem = $this->getFirstMedia();
+        
+        if ($mediaItem) {
+            return $mediaItem->getUrl($media);
         }
-
-        // If it's already a full URL (from factory), return as-is
-        if (filter_var($value, FILTER_VALIDATE_URL)) {
-            return $value;
-        }
-
-        // Otherwise, convert storage path to URL
-        return asset('storage/'.$value);
+        
+        return null;
     }
 }

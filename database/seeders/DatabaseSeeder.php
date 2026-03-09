@@ -2,17 +2,14 @@
 
 namespace Database\Seeders;
 
-use App\Models\Post;
 use App\Models\Category;
+use App\Models\Post;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
      * Seed the application's database.
      */
@@ -38,7 +35,6 @@ class DatabaseSeeder extends Seeder
                 'name' => $category,
             ]);
         }
-
 
         Post::factory(10)->create();
     }
